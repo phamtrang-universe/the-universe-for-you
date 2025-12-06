@@ -1,73 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Scorpio Universe</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Universe For You</title>
 
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background: radial-gradient(circle at 20% 30%, #0f0f25, #050514);
-            font-family: "Inter", sans-serif;
-            color: white;
-            height: 100vh;
-            width: 100vw;
-        }
-
-        #titleText {
-            position: fixed;
-            top: 8%;
-            width: 100%;
-            text-align: center;
-            font-size: 26px;
-            letter-spacing: 1px;
-            opacity: 0.9;
-            color: #c7d8ff;
-        }
-
-        #hint {
-            position: fixed;
-            bottom: 5%;
-            width: 100%;
-            text-align: center;
-            font-size: 14px;
-            color: #868bad;
-            opacity: 0.7;
-        }
-
-        #finalMessage {
-            position: fixed;
-            bottom: 15%;
-            width: 100%;
-            text-align: center;
-            font-size: 28px;
-            font-weight: 500;
-            color: #ffffff;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: 1s ease;
-        }
-
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-    <div id="titleText">Connecting your stars...</div>
 
-    <canvas id="starCanvas"></canvas>
+    <!-- Galaxy background -->
+    <canvas id="galaxy"></canvas>
 
-    <div id="finalMessage">In this universe, only you shine this bright.</div>
-    <div id="hint">Tap anywhere to connect the stars</div>
+    <!-- Constellation -->
+    <svg id="scorpio" width="100%" height="100%">
+        <!-- Stars -->
+        <circle class="star" cx="50%" cy="20%" r="3"></circle>
+        <circle class="star" cx="60%" cy="28%" r="3"></circle>
+        <circle class="star" cx="62%" cy="40%" r="3"></circle>
+        <circle class="star" cx="58%" cy="55%" r="3"></circle>
+        <circle class="star" cx="55%" cy="65%" r="3"></circle>
+        <circle class="star" cx="50%" cy="75%" r="3"></circle>
 
-    <script src="scripts.js"></script>
+        <!-- Lines (hidden first) -->
+        <polyline id="connect-line"
+                  points="50,20 60,28 62,40 58,55 55,65 50,75"
+                  stroke="rgba(255,255,255,0.8)"
+                  stroke-width="2"
+                  fill="none"
+                  stroke-dasharray="400"
+                  stroke-dashoffset="400">
+        </polyline>
+    </svg>
+
+    <!-- Intro text -->
+    <div id="intro">
+        <span class="typing">Connecting your stars…</span>
+    </div>
+
+    <!-- Explosion flash -->
+    <div id="flash"></div>
+
+    <script src="script.js"></script>
 </body>
 </html>
+
 
 
