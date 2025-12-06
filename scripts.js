@@ -1,7 +1,21 @@
-// =========================
-// CANVAS SETUP
-// =========================
-const canvas = document.getElementById("starCanvas");
+// Universe Level 2 — script.js
+// Cinematic Galaxy + Scorpio Constellation + Touch Interaction + Star Explosion
+
+// ===== CONFIG =====
+const STAR_COUNT = 250;
+const STAR_SPEED = 0.12;
+const CONSTELLATION_POINTS = [
+    { x: 0.38, y: 0.20 },
+    { x: 0.45, y: 0.28 },
+    { x: 0.52, y: 0.37 },
+    { x: 0.55, y: 0.47 },
+    { x: 0.48, y: 0.60 },
+    { x: 0.42, y: 0.72 },
+    { x: 0.50, y: 0.82 }
+];
+
+// ===== CANVAS SETUP =====
+const canvas = document.getElementById("universeCanvas");
 const ctx = canvas.getContext("2d");
 
 function resizeCanvas() {
@@ -11,92 +25,119 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
-// =========================
-// SCORPIO STARS (RELATIVE POSITION)
-// =========================
-// Tọa độ theo % để auto scale đẹp ở mọi màn hình
-const stars = [
-    { x: 0.52, y: 0.12 },
-    { x: 0.65, y: 0.20 },
-    { x: 0.70, y: 0.30 },
-    { x: 0.63, y: 0.42 },
-    { x: 0.58, y: 0.55 },
-    { x: 0.60, y: 0.68 },
-    { x: 0.55, y: 0.80 },
-];
+// ===== STARFIELD GENERATION =====
+let stars = [];
 
-// Convert star % → pixel
-function scaledStars() {
-    return stars.map(s => ({
-        x: s.x * canvas.width,
-        y: s.y * canvas.height
-    }));
+function generateStars() {
+    stars = [];
+    for (let i = 0; i < STAR_COUNT; i++) {
+        stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            z: Math.random() * 2 + 0.3,
+            size: Math.random() * 1.2 + 0.2
+        });
+    }
 }
+generateStars();
 
-// =========================
-// DRAW STARS
-// =========================
-function drawStars() {
+// ===== DRAW MOVING GALAXY =====
+function drawGalaxy() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const pts = scaledStars();
 
-    pts.forEach(p => {
+    stars.forEach(star => {
+        star.y += STAR_SPEED * star.z;
+        if (star.y > canvas.height) star.y = 0;
+
+        ctx.globalAlpha = 0.6 * star.z;
+        ctx.fillStyle = "white";
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
-        ctx.fillStyle = "#ffffff";
-        ctx.shadowBlur = 12;
-        ctx.shadowColor = "#88c0ff";
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
         ctx.fill();
     });
 }
 
-drawStars();
+// ===== CONSTELLATION =====
+let constellationPixels = [];
+let touchedIndex = 0;
+let allConnected = false;
 
-// =========================
-// CONNECT LINES ON TAP
-// =========================
-let connected = false;
+function drawConstellation() {
+    constellationPixels = CONSTELLATION_POINTS.map(p => ({
+        x: p.x * canvas.width,
+        y: p.y * canvas.height
+    }));
 
-function connectStars() {
-    if (connected) return;
-    connected = true;
-
-    const pts = scaledStars();
-    let index = 0;
-
-    function drawNext() {
-        if (index >= pts.length - 1) {
-            showMessage();
-            return;
-        }
-
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    constellationPixels.forEach((p, i) => {
         ctx.beginPath();
-        ctx.moveTo(pts[index].x, pts[index].y);
-        ctx.lineTo(pts[index + 1].x, pts[index + 1].y);
-        ctx.strokeStyle = "#7ab8ff";
-        ctx.lineWidth = 2.2;
-        ctx.shadowBlur = 18;
-        ctx.shadowColor = "#7ab8ff";
-        ctx.stroke();
+        ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+        ctx.fill();
 
-        index++;
-        setTimeout(drawNext, 350);
+        // Glow
+        ctx.globalAlpha = 0.25;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+    });
+
+    // Draw connected lines
+    ctx.strokeStyle = "rgba(255,255,255,0.9)";
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    for (let i = 0; i < touchedIndex - 1; i++) {
+        ctx.moveTo(constellationPixels[i].x, constellationPixels[i].y);
+        ctx.lineTo(constellationPixels[i + 1].x, constellationPixels[i + 1].y);
     }
-
-    drawNext();
+    ctx.stroke();
 }
 
-// =========================
-// FINAL MESSAGE
-// =========================
+// ===== TOUCH HANDLING =====
+canvas.addEventListener("pointerdown", e => {
+    if (allConnected) return;
+
+    let x = e.clientX;
+    let y = e.clientY;
+
+    let target = constellationPixels[touchedIndex];
+
+    let dist = Math.hypot(x - target.x, y - target.y);
+
+    if (dist < 30) {
+        touchedIndex++;
+
+        if (touchedIndex === CONSTELLATION_POINTS.length) {
+            allConnected = true;
+            setTimeout(showMessage, 700);
+            setTimeout(starExplosion, 2000);
+        }
+    }
+});
+
+// ===== TYPING MESSAGE =====
 function showMessage() {
-    const msg = document.getElementById("finalMessage");
+    const msg = document.getElementById("messageText");
     msg.style.opacity = 1;
-    msg.style.transform = "translateY(0)";
 }
 
-// =========================
-// TAP / CLICK EVENT
-// =========================
-canvas.addEventListener("click", connectStars);
-canvas.addEventListener("touchstart", connectStars);
+// ===== STAR EXPLOSION =====
+function starExplosion() {
+    const flash = document.getElementById("flash");
+    flash.style.opacity = 1;
+    flash.style.transition = "opacity 0.6s ease";
+
+    setTimeout(() => {
+        window.location.href = "message.html";
+    }, 800);
+}
+
+// ===== MAIN LOOP =====
+function animate() {
+    drawGalaxy();
+    drawConstellation();
+    requestAnimationFrame(animate);
+}
+animate();
+
