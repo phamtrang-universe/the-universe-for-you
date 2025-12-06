@@ -108,7 +108,7 @@ let introFinished = false;
 
 let currentSegmentIndex = 0; // segment between point[i] and point[i+1]
 let segmentProgress = 0;     // 0 → 1
-const SEGMENT_DURATION = 650; // ms per segment (controls length of the draw)
+const SEGMENT_DURATION = 650; // ms per segment
 
 /* Draw Scorpius points + animated connecting lines */
 function drawScorpius(time) {
@@ -294,7 +294,7 @@ const universeClock = new THREE.Clock();
 /* Initialize Three.js scene */
 function initUniverse3D() {
   const width = universe3DContainer.clientWidth;
-  const height = universe3DContainer.clientHeight;
+  const height = universe3DContainer.clientHeight || window.innerHeight;
 
   scene = new THREE.Scene();
 
@@ -406,7 +406,7 @@ function createScorpius3D() {
   const line = new THREE.Line(lineGeometry, lineMaterial);
   scorpiusGroup.add(line);
 
-  // Slight tilt
+  // Initial tilt (base orientation)
   scorpiusGroup.rotation.x = THREE.MathUtils.degToRad(-18);
 
   scene.add(scorpiusGroup);
@@ -462,17 +462,26 @@ function animateUniverse() {
     stars3D.material.opacity = base + swing * Math.sin(elapsed * 0.7);
   }
 
-  // Rotate Scorpius slowly + soft glow pulsing
+  // Scorpius: almost static base pose + gentle wobble + soft glow (mix 1, 2, 3)
   if (scorpiusGroup) {
-    scorpiusGroup.rotation.y += 0.002;
+    // Base angles so it feels posed
+    const baseRotY = THREE.MathUtils.degToRad(-8);
+    const baseRotX = THREE.MathUtils.degToRad(-18);
 
+    // Tiny breathing motion, not a full spin
+    const wobbleY = Math.sin(elapsed * 0.25) * THREE.MathUtils.degToRad(4);  // ±4°
+    const wobbleX = Math.sin(elapsed * 0.18 + 1.2) * THREE.MathUtils.degToRad(2); // ±2°
+
+    scorpiusGroup.rotation.y = baseRotY + wobbleY;
+    scorpiusGroup.rotation.x = baseRotX + wobbleX;
+
+    // Soft glow pulsing on all stars
     scorpiusGroup.children.forEach(obj => {
       if (obj.isMesh) {
         const pulse = 0.6 + 0.4 * Math.sin(elapsed * 1.4);
-        const c = 0xfff5cf;
-        const baseColor = new THREE.Color(c);
-        const brighter = baseColor.clone().multiplyScalar(0.8 + 0.4 * pulse);
-        obj.material.color.copy(brighter);
+        const baseColor = new THREE.Color(0xfff5cf);
+        const brightened = baseColor.clone().multiplyScalar(0.9 + 0.5 * pulse);
+        obj.material.color.copy(brightened);
       }
     });
   }
