@@ -1,0 +1,25 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: black;
+    overflow: hidden;
+    font-family: "Poppins", sans-serif;
+}
+
+#universe {
+    width: 100vw;
+    height: 100vh;
+    display: block;
+}
+
+#typing-text {
+    position: absolute;
+    top: 15%;
+    width: 100%;
+    text-align: center;
+    font-size: 22px;
+    color: #c9d6ff;
+    letter-spacing: 1px;
+    text-shadow: 0 0 12px #8ab4ff;
+    z-index: 10;
+}
