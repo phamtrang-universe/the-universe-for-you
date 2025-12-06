@@ -1,134 +1,119 @@
-/* style.css - Level2 Universe (Galaxy + Constellation) */
-
-:root{
-  --bg-dark: #030214;
-  --galaxy-a: #071133; /* deep blue */
-  --galaxy-b: #2b1b5a; /* purple */
-  --accent: #9bd1ff; /* light blue */
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-html,body{
-  height:100%;
-  width:100%;
-  margin:0;
-  padding:0;
-  background: radial-gradient(1200px 800px at 10% 30%, rgba(43,27,90,0.18), transparent 8%),
-              radial-gradient(1000px 600px at 85% 70%, rgba(11,59,255,0.12), transparent 8%),
-              var(--bg-dark);
-  overflow:hidden;
-  font-family: Inter, 'Helvetica Neue', Arial, sans-serif;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #02010f;
+    font-family: "Inter", sans-serif;
+    color: #fff;
 }
 
-/* Canvas covers whole screen */
-#galaxy{
-  position:fixed;
-  inset:0;
-  width:100%;
-  height:100%;
-  display:block;
-  z-index:0;
+/* ===== CONSTELLATION CANVAS ===== */
+#constellationCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+    z-index: 1;
 }
 
-/* SVG constellation sits above canvas */
-#scorpio{
-  position:fixed;
-  inset:0;
-  pointer-events:auto;
-  z-index:2;
+/* ===== UI TEXT ===== */
+#ui {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 5;
+    animation: fadeIn 1.2s ease forwards;
+    opacity: 0;
 }
 
-/* default star style (small points) */
-.star{
-  fill: rgba(255,255,255,0.86);
-  filter: drop-shadow(0 6px 18px rgba(160,180,255,0.06));
-  opacity: 0.85;
-  transition: transform 0.35s cubic-bezier(.2,.9,.3,1), opacity 0.3s ease;
+#headline {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 0 0 12px rgba(255,255,255,0.6);
 }
 
-/* subtle pulse for visible stars */
-.star.pulse{
-  transform: scale(1.6);
-  opacity: 1;
+#hint {
+    font-size: 1rem;
+    opacity: 0.7;
+    animation: blink 2s infinite;
 }
 
-/* the connecting line initially hidden via dashoffset */
-#connect-line{
-  z-index:3;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-  transition: stroke-dashoffset 1.1s cubic-bezier(.2,.9,.3,1), opacity 0.6s ease;
-  opacity:0.95;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, -45%); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
 }
 
-/* Intro text - centered and cinematic */
-#intro{
-  position: fixed;
-  top: 12vh;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index:5;
-  width: 100%;
-  max-width: 920px;
-  text-align:center;
-  pointer-events:none; /* allow clicks to pass to canvas/svg */
+@keyframes blink {
+    0%, 100% { opacity: 0.45; }
+    50% { opacity: 1; }
 }
 
-.typing{
-  font-size: clamp(18px, 4.4vw, 28px);
-  color: rgba(220,235,255,0.98);
-  letter-spacing:1px;
-  font-weight:600;
-  text-shadow: 0 8px 40px rgba(60,110,255,0.06), 0 2px 12px rgba(0,0,0,0.45);
+/* ===== TRANSITION EFFECT ===== */
+#flash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 20;
+    transition: opacity 0.7s ease;
 }
 
-/* blinking cursor through pseudo-element - JS will append text, cursor remains */
-.typing::after{
-  content: "|";
-  margin-left:6px;
-  opacity:0.95;
-  color: var(--accent);
-  display:inline-block;
-  animation: blink 1s steps(2,start) infinite;
+#loadingText {
+    position: fixed;
+    bottom: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.25rem;
+    letter-spacing: 1px;
+    opacity: 0;
+    z-index: 30;
 }
 
-@keyframes blink{ 50%{ opacity:0 } }
-
-/* Explosion flash overlay - hidden by default */
-#flash{
-  pointer-events:none;
-  position:fixed;
-  inset:0;
-  z-index:8;
-  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.95) 0%, rgba(255,244,220,0.6) 10%, transparent 30%);
-  opacity:0;
-  mix-blend-mode: screen;
-  transition: opacity 0.45s ease, transform 0.6s cubic-bezier(.2,.9,.3,1);
+/* Fade in loading text */
+#loadingText.show {
+    animation: fadeInLoad 1.2s ease forwards;
 }
 
-#flash.show{
-  opacity:1;
-  transform: scale(1.02);
+@keyframes fadeInLoad {
+    0% { opacity: 0; transform: translate(-50%, 10px); }
+    100% { opacity: 1; transform: translate(-50%, 0); }
 }
 
-/* mobile safe adjustments */
-@media (max-width:520px){
-  .typing{ font-size: 16px; top: 8vh }
-  #intro{ top:10vh; }
-  .star{ r:2; }
+/* ===== 3D UNIVERSE CANVAS ===== */
+#universe3D {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 50;
+    background: black;
 }
 
-/* small accessibility hint */
-body::after{
-  content: "Tap anywhere to connect the stars";
-  position: fixed;
-  bottom: 18px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: rgba(200,220,255,0.55);
-  font-size: 12px;
-  z-index:6;
-  pointer-events:none;
+#universeCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
 }
 
+/* Hide UI when finished */
+.hide {
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
