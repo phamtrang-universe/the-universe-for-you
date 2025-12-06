@@ -1,119 +1,111 @@
-/* RESET */
+/* =============================
+   GLOBAL RESET
+============================= */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 html, body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: #02010f;
-    font-family: "Inter", sans-serif;
-    color: #fff;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #020118; /* deep space */
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  touch-action: none; /* prevent scroll on tap */
 }
 
-/* ===== CONSTELLATION CANVAS ===== */
-#constellationCanvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    display: block;
-    z-index: 1;
+/* =============================
+   CANVAS
+============================= */
+#stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
-/* ===== UI TEXT ===== */
+/* =============================
+   UI TEXT (headline + hint)
+============================= */
 #ui {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    z-index: 5;
-    animation: fadeIn 1.2s ease forwards;
-    opacity: 0;
+  position: absolute;
+  width: 100%;
+  top: 6vh;
+  text-align: center;
+  color: white;
+  z-index: 3;
+  pointer-events: none;
 }
 
 #headline {
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-bottom: 12px;
-    text-shadow: 0 0 12px rgba(255,255,255,0.6);
+  font-size: 5vw;
+  letter-spacing: 0.5px;
+  opacity: 0.95;
+  font-weight: 600;
 }
 
 #hint {
-    font-size: 1rem;
-    opacity: 0.7;
-    animation: blink 2s infinite;
+  margin-top: 1vh;
+  font-size: 3.6vw;
+  opacity: 0.7;
+  font-weight: 300;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translate(-50%, -45%); }
-    to { opacity: 1; transform: translate(-50%, -50%); }
+/* On very small phones */
+@media (max-width: 380px) {
+  #headline { font-size: 6vw; }
+  #hint { font-size: 4.2vw; }
 }
 
-@keyframes blink {
-    0%, 100% { opacity: 0.45; }
-    50% { opacity: 1; }
-}
-
-/* ===== TRANSITION EFFECT ===== */
+/* =============================
+   FLASH WHITE SCREEN
+============================= */
 #flash {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: white;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 20;
-    transition: opacity 0.7s ease;
+  position: absolute;
+  inset: 0;
+  background: white;
+  opacity: 0;
+  z-index: 10;
+  pointer-events: none;
+  transition: opacity 0.45s ease;
 }
 
-#loadingText {
-    position: fixed;
-    bottom: 10%;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 1.25rem;
-    letter-spacing: 1px;
-    opacity: 0;
-    z-index: 30;
+/* =============================
+   PARTICLE EXPLOSION LAYER
+============================= */
+#particleLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  overflow: hidden;
 }
 
-/* Fade in loading text */
-#loadingText.show {
-    animation: fadeInLoad 1.2s ease forwards;
+/* =============================
+   FINAL MESSAGE
+============================= */
+#finalMessage {
+  position: absolute;
+  width: 100%;
+  top: 42vh;
+  text-align: center;
+  color: white;
+  font-size: 5.5vw;
+  opacity: 0;
+  font-weight: 500;
+  z-index: 12;
+  pointer-events: none;
+  transition: opacity 1.4s ease;
+  padding: 0 5vw;
+  line-height: 1.35;
 }
 
-@keyframes fadeInLoad {
-    0% { opacity: 0; transform: translate(-50%, 10px); }
-    100% { opacity: 1; transform: translate(-50%, 0); }
-}
-
-/* ===== 3D UNIVERSE CANVAS ===== */
-#universe3D {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 50;
-    background: black;
-}
-
-#universeCanvas {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-
-/* Hide UI when finished */
-.hide {
-    opacity: 0;
-    transition: opacity 0.8s ease;
+@media (max-width: 390px) {
+  #finalMessage {
+    font-size: 6vw;
+  }
 }
