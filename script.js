@@ -1,116 +1,142 @@
-// ----------------------
-// 1. Typing Effect
-// ----------------------
-const text = "This universe was created just for you.";
-const speed = 70;
-let i = 0;
+// Universe Level 2 — script.js
+// Cinematic Galaxy + Scorpio Constellation + Touch Interaction + Star Explosion
 
-function typeEffect() {
-    if (i < text.length) {
-        document.getElementById("typing-text").innerHTML += text.charAt(i);
-        i++;
-        setTimeout(typeEffect, speed);
-    }
-}
-typeEffect();
-
-// ----------------------
-// 2. Play music on tap (mobile safe)
-// ----------------------
-document.addEventListener("click", () => {
-    const music = document.getElementById("bgmusic");
-    music.play();
-}, { once: true });
-
-// ----------------------
-// 3. Three.js Galaxy Scene
-// ----------------------
-const canvas = document.getElementById("universe");
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-
-const scene = new THREE.Scene();
-
-// Camera
-const camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
-);
-camera.position.z = 50;
-
-// Starfield
-const starsGeometry = new THREE.BufferGeometry();
-const starCount = 8000;
-const starPositions = new Float32Array(starCount * 3);
-
-for (let i = 0; i < starCount * 3; i++) {
-    starPositions[i] = (Math.random() - 0.5) * 600;
-}
-starsGeometry.setAttribute(
-    "position",
-    new THREE.BufferAttribute(starPositions, 3)
-);
-
-const starsMaterial = new THREE.PointsMaterial({
-    color: 0x8899ff,
-    size: 0.7,
-    transparent: true,
-});
-
-const starField = new THREE.Points(starsGeometry, starsMaterial);
-scene.add(starField);
-
-// Nebula glow
-const nebulaGeometry = new THREE.SphereGeometry(80, 32, 32);
-const nebulaMaterial = new THREE.MeshBasicMaterial({
-    color: 0x3344ff,
-    transparent: true,
-    opacity: 0.15,
-});
-const nebula = new THREE.Mesh(nebulaGeometry, nebulaMaterial);
-scene.add(nebula);
-
-// ----------------------
-// 4. Scorpius Constellation (Bọ Cạp)
-// ----------------------
-const scorpiusPoints = [
-    new THREE.Vector3(-10, 5, 0),
-    new THREE.Vector3(-8, 2, 1),
-    new THREE.Vector3(-6, -2, 0),
-    new THREE.Vector3(-4, -5, -1),
-    new THREE.Vector3(-2, -7, 0),
-    new THREE.Vector3(0, -9, 1),
-    new THREE.Vector3(2, -10, 0),
+// ===== CONFIG =====
+const STAR_COUNT = 250;
+const STAR_SPEED = 0.12;
+const CONSTELLATION_POINTS = [
+    { x: 0.38, y: 0.20 },
+    { x: 0.45, y: 0.28 },
+    { x: 0.52, y: 0.37 },
+    { x: 0.55, y: 0.47 },
+    { x: 0.48, y: 0.60 },
+    { x: 0.42, y: 0.72 },
+    { x: 0.50, y: 0.82 }
 ];
 
-const lineGeometry = new THREE.BufferGeometry().setFromPoints(scorpiusPoints);
-const lineMaterial = new THREE.LineBasicMaterial({ color: 0x99bbff });
-const scorpiusLine = new THREE.Line(lineGeometry, lineMaterial);
-scorpiusLine.position.set(20, -10, -10);
-scene.add(scorpiusLine);
+// ===== CANVAS SETUP =====
+const canvas = document.getElementById("universeCanvas");
+const ctx = canvas.getContext("2d");
 
-// ----------------------
-// 5. Animation Loop
-// ----------------------
-function animate() {
-    requestAnimationFrame(animate);
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
 
-    starField.rotation.y += 0.0007;
-    nebula.rotation.y += 0.0002;
-    scorpiusLine.rotation.y += 0.001;
+// ===== STARFIELD GENERATION =====
+let stars = [];
 
-    renderer.render(scene, camera);
+function generateStars() {
+    stars = [];
+    for (let i = 0; i < STAR_COUNT; i++) {
+        stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            z: Math.random() * 2 + 0.3,
+            size: Math.random() * 1.2 + 0.2
+        });
+    }
+}
+generateStars();
+
+// ===== DRAW MOVING GALAXY =====
+function drawGalaxy() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    stars.forEach(star => {
+        star.y += STAR_SPEED * star.z;
+        if (star.y > canvas.height) star.y = 0;
+
+        ctx.globalAlpha = 0.6 * star.z;
+        ctx.fillStyle = "white";
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        ctx.fill();
+    });
 }
 
-animate();
+// ===== CONSTELLATION =====
+let constellationPixels = [];
+let touchedIndex = 0;
+let allConnected = false;
 
-// ----------------------
-// 6. Resize Handler
-// ----------------------
-window.addEventListener("resize", () => {
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+function drawConstellation() {
+    constellationPixels = CONSTELLATION_POINTS.map(p => ({
+        x: p.x * canvas.width,
+        y: p.y * canvas.height
+    }));
+
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    constellationPixels.forEach((p, i) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Glow
+        ctx.globalAlpha = 0.25;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+    });
+
+    // Draw connected lines
+    ctx.strokeStyle = "rgba(255,255,255,0.9)";
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    for (let i = 0; i < touchedIndex - 1; i++) {
+        ctx.moveTo(constellationPixels[i].x, constellationPixels[i].y);
+        ctx.lineTo(constellationPixels[i + 1].x, constellationPixels[i + 1].y);
+    }
+    ctx.stroke();
+}
+
+// ===== TOUCH HANDLING =====
+canvas.addEventListener("pointerdown", e => {
+    if (allConnected) return;
+
+    let x = e.clientX;
+    let y = e.clientY;
+
+    let target = constellationPixels[touchedIndex];
+
+    let dist = Math.hypot(x - target.x, y - target.y);
+
+    if (dist < 30) {
+        touchedIndex++;
+
+        if (touchedIndex === CONSTELLATION_POINTS.length) {
+            allConnected = true;
+            setTimeout(showMessage, 700);
+            setTimeout(starExplosion, 2000);
+        }
+    }
 });
+
+// ===== TYPING MESSAGE =====
+function showMessage() {
+    const msg = document.getElementById("messageText");
+    msg.style.opacity = 1;
+}
+
+// ===== STAR EXPLOSION =====
+function starExplosion() {
+    const flash = document.getElementById("flash");
+    flash.style.opacity = 1;
+    flash.style.transition = "opacity 0.6s ease";
+
+    setTimeout(() => {
+        window.location.href = "message.html";
+    }, 800);
+}
+
+// ===== MAIN LOOP =====
+function animate() {
+    drawGalaxy();
+    drawConstellation();
+    requestAnimationFrame(animate);
+}
+animate();
